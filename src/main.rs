@@ -17,7 +17,7 @@ use fixedbitset::FixedBitSet;
 use text_io::read;
 use itertools::Itertools;
 use itermore::IterMore;
-use indicatif::ProgressBar;
+use indicatif::ProgressIterator;
 
 // use io::Error;
 
@@ -143,9 +143,18 @@ impl Iterator for TemperatureIterator {
             Some(self.start)
         }
     }
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        (((self.start / self.end).log2() / (1.0/self.q).log2()) as usize, Some(((self.start / self.end).log2() / (1.0/self.q).log2() + 1.0) as usize))
+    // fn size_hint(&self) -> (usize, Option<usize>) {
+    //     (((self.start / self.end).log2() / (1.0/self.q).log2()) as usize, Some(((self.start / self.end).log2() / (1.0/self.q).log2() + 1.0) as usize))
+    // }
+}
+
+impl ExactSizeIterator for TemperatureIterator {
+    fn len(&self) -> usize {
+        ((self.start / self.end).log2() / (1.0/self.q).log2() + 1.0) as usize
     }
+    // fn is_empty(&self) -> bool {
+    //     self.start <= self.end
+    // }
 }
 
 fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
@@ -154,7 +163,7 @@ fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
     let mut count = 0;
     // println!("{}", verify_solution(graph, &mut initial_solution.iter()));
     // let bar = ProgressBar::new(1448);
-    for t in (TemperatureIterator{start: 50000f64, end: 1e-8, q: 0.98}) {
+    for t in (TemperatureIterator{start: 50000f64, end: 1e-8, q: 0.98}).progress() {
         for _ in 0..1000 {
             // do 1000 times
             let mut new_solution = solution.clone();
@@ -172,9 +181,9 @@ fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
             }
         }
         count += 1;
-        bar.inc(1)
+        // bar.inc(1)
     }
-    bar.finish();
+    // bar.finish();
     println!("simulated annealing done with {} cycles.", count);
     Some(solution)
     // vec![1, 2]
