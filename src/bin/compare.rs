@@ -1,4 +1,4 @@
-use indicatif::ProgressBar;
+use indicatif::{ProgressBar, ProgressStyle};
 use std::io::Read;
 use std::thread::spawn;
 use subprocess::{Exec, NullFile, Redirection};
@@ -9,6 +9,9 @@ fn main() {
     let threads_count = 16;
     let total_number = 16;
     let bar = ProgressBar::new(total_number);
+    bar.set_style(ProgressStyle::default_bar()
+        .template("[{elapsed} / {eta}]({per_sec}) {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+        .progress_chars("##-"));
     let mut wrong_count = 0;
     for _ in 0..threads_count {
         bar.tick();
