@@ -164,13 +164,13 @@ fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
     let mut solution = generate_solution(graph, node_index(0))?;
     let mut solution_length = verify_solution(graph, &mut solution.iter());
     for t in (TemperatureIterator {
-        start: 5f64,
+        start: 1f64,
         end: 1e-3,
-        q: 0.97,
+        q: 0.95,
     })
     .progress()
     {
-        for _ in 0..1000 {
+        for _ in 0..200 {
             // do 1000 times
             let mut new_solution = solution.clone();
             change_solution(&mut new_solution);

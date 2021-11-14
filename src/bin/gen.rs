@@ -18,7 +18,7 @@ fn output_points(points: &Vec<Point>) {
 fn main() {
     // let points = read_points(true);
     let mut points = Vec::<Point>::new();
-    let n = 15;
+    let n = 22;
     let mut rng = rand::thread_rng();
     for _ in 0..n {
         points.push(Point {
