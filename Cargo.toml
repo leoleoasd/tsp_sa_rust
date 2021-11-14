@@ -13,3 +13,17 @@ itertools = "0.10.1"
 itermore = "0.1.0"
 rand = "0.8.4"
 indicatif = "0.16.2"
+imageproc = "0.22.0"
+image = "0.23.14"
+
+[[bin]]
+name = "simulated-annealing"
+path = "src/bin/sa.rs"
+
+[[bin]]
+name = "generate-map"
+path = "src/bin/gen.rs"
+
+[[bin]]
+name = "visualize"
+path = "src/bin/visualize.rs"
