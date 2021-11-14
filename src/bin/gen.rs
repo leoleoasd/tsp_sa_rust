@@ -1,5 +1,6 @@
+// use std::slice::range;
+use rand::prelude::*;
 use tsp_sa::point::*;
-
 
 fn output_points(points: &Vec<Point>) {
     println!("{}", points.len());
@@ -9,13 +10,22 @@ fn output_points(points: &Vec<Point>) {
         }
         println!();
     }
-    for i in 0..points.len() {
-        println!("{} {}", points[i].x, points[i].y);
-    }
+    // for i in 0..points.len() {
+    //     println!("{} {}", points[i].x, points[i].y);
+    // }
 }
 
 fn main() {
-    let points = read_points(true);
+    // let points = read_points(true);
+    let mut points = Vec::<Point>::new();
+    let n = 15;
+    let mut rng = rand::thread_rng();
+    for _ in 0..n {
+        points.push(Point {
+            x: rng.gen_range(0..100),
+            y: rng.gen_range(0..100),
+        });
+    }
     output_points(&points);
 }
 /*

@@ -1,4 +1,3 @@
-
 use image::{GenericImage, ImageBuffer, Rgb, RgbImage};
 use imageproc::drawing::{
     draw_antialiased_line_segment_mut, draw_filled_circle_mut, draw_filled_rect_mut,
@@ -11,7 +10,6 @@ use std::io::{stdin, Read};
 use std::sync::Arc;
 use std::thread::spawn;
 use tsp_sa::point::*;
-
 
 fn draw_points(points: Arc<Vec<Point>>) {
     let maxx = points.iter().map(|p| p.x).max().unwrap();
@@ -43,7 +41,9 @@ fn draw_points(points: Arc<Vec<Point>>) {
                 //     .collect();
                 for [prev, next] in line
                     .split(" ")
-                    .filter_map(|s| s.parse::<usize>().ok()).windows() {
+                    .filter_map(|s| s.parse::<usize>().ok())
+                    .windows()
+                {
                     draw_antialiased_line_segment_mut(
                         &mut img,
                         points[prev].to_coord(),

@@ -1,6 +1,5 @@
 #![feature(destructuring_assignment)]
 
-
 use fixedbitset::FixedBitSet;
 use indicatif::ProgressIterator;
 use itermore::IterMore;
@@ -164,12 +163,9 @@ impl ExactSizeIterator for TemperatureIterator {
 fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
     let mut solution = generate_solution(graph, node_index(0))?;
     let mut solution_length = verify_solution(graph, &mut solution.iter());
-    let mut count = 0;
-    // println!("{}", verify_solution(graph, &mut initial_solution.iter()));
-    // let bar = ProgressBar::new(1448);
     for t in (TemperatureIterator {
-        start: 50000f64,
-        end: 1e-8,
+        start: 5f64,
+        end: 1e-3,
         q: 0.97,
     })
     .progress()
@@ -191,23 +187,19 @@ fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
             }
         }
         // print!("{}:", verify_solution(graph, &mut solution.iter()));
-        for n in &solution {
-            print!("{} ", n.index());
-        }
-        println!();
-        count += 1;
-        // bar.inc(1)
+        // for n in &solution {
+        //     print!("{} ", n.index());
+        // }
+        // println!();
     }
-    // bar.finish();
-    println!("simulated annealing done with {} cycles.", count);
+    // println!("simulated annealing done with {} cycles.", count);
     Some(solution)
-    // vec![1, 2]
 }
 
 fn main() {
     let graph = read_graph();
     let result = simulated_annealing(&graph);
-    println!("{:?}", result);
+    // println!("{:?}", result);
     println!("{:?}", verify_solution(&graph, &mut result.unwrap().iter()));
 }
 

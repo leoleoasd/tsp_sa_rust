@@ -1,5 +1,5 @@
-use text_io::scan;
 use rand::prelude::*;
+use text_io::scan;
 
 #[derive(Clone)]
 pub struct Point {
@@ -36,4 +36,3 @@ pub fn read_points(shuffle: bool) -> Vec<Point> {
     }
     points
 }
-

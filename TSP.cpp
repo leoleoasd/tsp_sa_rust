@@ -56,6 +56,8 @@ int main()
             p[0][(1<<(n-1))-1]=k;
         }
     }
+    printf("%.16lf\n", min);
+    return 0;
     printf("min value is: %lf\n",min);
     int temp1;
     temp1=(1<<(n-1))-1;
