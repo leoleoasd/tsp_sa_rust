@@ -163,15 +163,15 @@ impl ExactSizeIterator for TemperatureIterator {
 fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
     let mut solution = generate_solution(graph, node_index(0))?;
     let mut solution_length = verify_solution(graph, &mut solution.iter());
-    for t in (TemperatureIterator {
-        start: 1f64,
-        end: 1e-3,
-        q: 0.95,
+    let mut i = (TemperatureIterator {
+        start: 500f64,
+        end: 1e-5,
+        q: 1.0 - 1e-5,
     })
-    .progress()
+        .progress();
+    while let Some(mut t) = i.next()
     {
-        for _ in 0..200 {
-            // do 1000 times
+        for _ in 0..400 {
             let mut new_solution = solution.clone();
             change_solution(&mut new_solution);
             let diff = verify_solution(graph, &mut new_solution.iter()) - solution_length;
@@ -183,6 +183,12 @@ fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
                 if random::<f64>() < p {
                     solution = new_solution;
                     solution_length = verify_solution(graph, &mut solution.iter());
+                    match i.next() {
+                        Some(v) => {
+                            t = v;
+                        },
+                        None => break
+                    }
                 }
             }
         }
