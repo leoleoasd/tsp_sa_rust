@@ -15,11 +15,13 @@ fn main() {
         .template("[{elapsed} / {eta}]({per_sec}) {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
         .progress_chars("##-"));
     let wrong_count = Arc::new(AtomicI32::new(0));
+    let medium_count = Arc::new(AtomicI32::new(0));
     let huge_wrong_count = Arc::new(AtomicI32::new(0));
     for _ in 0..threads_count {
         bar.tick();
         let bar = bar.clone();
         let wrong_count =  wrong_count.clone();
+        let medium_count = medium_count.clone();
         let huge_wrong_count = huge_wrong_count.clone();
         threads.push(spawn(move || {
             for _ in 0..total_number / threads_count {
@@ -60,7 +62,10 @@ fn main() {
                 if (dp_read - sa_read).abs() / dp_read > 0.05 {
                     huge_wrong_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
                 }
-                bar.set_message(format!("{} / {} / {}", wrong_count.load(Ordering::SeqCst), huge_wrong_count.load(Ordering::SeqCst), bar.position()));
+                if (dp_read - sa_read).abs() / dp_read > 0.01 {
+                    medium_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                }
+                bar.set_message(format!("W{}/M{}/H{}/T{}", wrong_count.load(Ordering::SeqCst),medium_count.load(Ordering::SeqCst), huge_wrong_count.load(Ordering::SeqCst), bar.position()));
                 bar.inc(1)
             }
         }))
@@ -69,5 +74,5 @@ fn main() {
         thread.join();
     }
     bar.finish();
-    println!("wrong_count: {}, huge_wrong_count: {}", wrong_count.load(Ordering::SeqCst), huge_wrong_count.load(Ordering::SeqCst));
+    println!("wrong_count: {}, medium_count: {}, huge_wrong_count: {}", wrong_count.load(Ordering::SeqCst),medium_count.load(Ordering::SeqCst), huge_wrong_count.load(Ordering::SeqCst));
 }
