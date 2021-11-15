@@ -54,7 +54,7 @@ fn main() {
                 let dp_read: f64;
                 scan!(output_sa.bytes() => "{}", sa_read);
                 scan!(output_dp.bytes() => "{}", dp_read);
-                println!("{} {}", (sa_end_time - begin_time).as_secs_f32(), (dp_end_time - sa_end_time).as_secs_f32());
+                bar.println(format!("{} {}", (sa_end_time - begin_time).as_secs_f32(), (dp_end_time - sa_end_time).as_secs_f32()));
                 // println!("{}  {}  {}", sa_read, dp_read, (dp_read - sa_read).abs());
                 if (dp_read - sa_read).abs() > 1e-6 {
                     wrong_count.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
