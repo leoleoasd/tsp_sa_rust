@@ -2,7 +2,7 @@
 #![feature(trait_upcasting)]
 
 use fixedbitset::FixedBitSet;
-use indicatif::ProgressIterator;
+use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use itermore::IterMore;
 use petgraph::matrix_graph::{node_index, MatrixGraph, NodeIndex};
 use rand::prelude::*;
@@ -30,10 +30,13 @@ impl Iterator for SwapSpanIterator<'_> {
         } else {
             match self.t {
                 OperateType::Swap => {
-                    if self.x <= self.next && self.next <= self.y {
+                    if self.x == self.next {
                         self.next += 1;
-                        Some(self.path[self.y - (self.next - 1 - self.x)])
-                    } else{
+                        Some(self.path[self.y])
+                    } else if self.y == self.next {
+                        self.next += 1;
+                        Some(self.path[self.x])
+                    } else {
                         self.next += 1;
                         Some(self.path[self.next - 1])
                     }
@@ -54,8 +57,16 @@ impl Iterator for SwapSpanIterator<'_> {
 
 impl SwapSpanIterator<'_> {
     fn operate(& mut self) {
-        for i in 0..(self.y - self.x) / 2 {
-            (self.path[self.x + i], self.path[self.y - i]) = (self.path[self.y - i], self.path[self.x + i]);
+        match self.t {
+            OperateType::Swap => {
+                self.path.swap(self.x, self.y);
+            }
+            OperateType::Span => {
+                for i in 0..(self.y - self.x) / 2 {
+                    self.path.swap(self.x + i, self.y - i);
+                    // (self.path[self.x + i], self.path[self.y - i]) = (self.path[self.y - i], self.path[self.x + i]);
+                }
+            }
         }
     }
 }
@@ -70,7 +81,11 @@ fn change_solution(path: &mut Vec<NodeIndex>) -> SwapSpanIterator {
         (y, x) = (x, y);
     }
     SwapSpanIterator{
-        t: OperateType::Span,
+        t: if random::<f64>() > 0.5 {
+            OperateType::Swap
+        } else {
+            OperateType::Span
+        },
         path,
         x,
         y,
@@ -108,12 +123,19 @@ impl ExactSizeIterator for TemperatureIterator {
 fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
     let mut solution = generate_solution(graph, node_index(0))?;
     let mut solution_length = verify_solution(graph,solution.iter().copied());
+
     let mut i = (TemperatureIterator {
         start: 500f64,
         end: 1e-5,
-        q: 1.0 - 1e-5,
-    })
-    .progress();
+        q: 1.0 - 1e-3,
+    });
+    let bar = ProgressBar::new(i.len() as u64);
+    bar.set_style(
+        ProgressStyle::default_bar()
+            .template("[{elapsed} / {eta}]({per_sec}) {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-"),
+    );
+    let mut i = i.progress_with(bar);
     while let Some(mut t) = i.next() {
         for _ in 0..400 {
             // let mut new_solution = solution.clone();
