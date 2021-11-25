@@ -76,10 +76,11 @@ pub fn generate_solution(graph: &MatrixGraph<(), f64>, from: NodeIndex) -> Optio
     None
 }
 
-pub fn verify_solution(
+pub fn verify_solution<'a, T>(
     graph: &MatrixGraph<(), f64>,
-    path: &mut dyn Iterator<Item = &NodeIndex>,
-) -> f64 {
+    path: T
+) -> f64
+where T: Iterator<Item=NodeIndex> {
     let mut visited = FixedBitSet::with_capacity(graph.node_count());
     let length = path
         .windows()
@@ -88,10 +89,10 @@ pub fn verify_solution(
                 return f64::MAX;
             }
             visited.put(next.index());
-            if !graph.has_edge(*prev, *next) {
+            if !graph.has_edge(prev, next) {
                 return f64::MAX;
             }
-            return *graph.edge_weight(*prev, *next);
+            return *graph.edge_weight(prev, next);
         })
         .fold(0f64, |sum, v| {
             if sum == f64::MAX || v == f64::MAX {
