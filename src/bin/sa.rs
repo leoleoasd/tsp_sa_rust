@@ -106,24 +106,32 @@ impl ChangeSolutionOperator<'_> {
 
 fn change_solution(path: &mut Vec<NodeIndex>) -> ChangeSolutionOperator {
     // generate a new solution by random swapping nodes in path
-    let [mut x, mut y] = [
+    let [mut x, mut y, mut z] = [
+        rand::thread_rng().gen_range(1..path.len() - 1),
         rand::thread_rng().gen_range(1..path.len() - 1),
         rand::thread_rng().gen_range(1..path.len() - 1),
     ];
+    if y > z {
+        swap(& mut y, & mut z);
+    }
+    if x > z {
+        swap(& mut x, & mut z);
+    }
     if x > y {
         swap(& mut x, & mut y);
-        // (y, x) = (x, y);
     }
     ChangeSolutionOperator {
-        t: if random::<f64>() > 0.5 {
+        t: if random::<f64>() > 0.3 {
             OperateType::Swap
-        } else {
+        } else if random::<f64>() > 0.3 {
             OperateType::Span
+        } else {
+            OperateType::Move
         },
         path,
         x,
         y,
-        z: 0,
+        z: z,
         next: 0
     }
 }
@@ -162,7 +170,7 @@ fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
     let mut i = (TemperatureIterator {
         start: 500f64,
         end: 1e-5,
-        q: 1.0 - 1e-3,
+        q: 1.0 - 1e-4,
     });
     let bar = ProgressBar::new(i.len() as u64);
     bar.set_style(
