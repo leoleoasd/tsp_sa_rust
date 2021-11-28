@@ -1,5 +1,6 @@
 #![feature(trait_upcasting)]
 
+use std::cmp::max;
 use std::mem::swap;
 use fixedbitset::FixedBitSet;
 use image::error::ImageFormatHint::Name;
@@ -208,9 +209,16 @@ fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
 
 fn main() {
     let graph = read_graph();
-    let result = simulated_annealing(&graph);
+    let result1 = simulated_annealing(&graph);
+    let result2 = simulated_annealing(&graph);
     // println!("{:?}", result);
-    println!("{:?}", verify_solution(&graph, Box::new(result.unwrap().into_iter())));
+    let ans1 = verify_solution(&graph, result1.unwrap().into_iter());
+    let ans2 = verify_solution(&graph, result2.unwrap().into_iter());
+    println!("{:?}", if ans1 < ans2 {
+        ans1
+    } else {
+        ans2
+    });
 }
 
 /*
