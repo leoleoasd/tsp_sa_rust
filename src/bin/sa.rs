@@ -1,7 +1,8 @@
-#![feature(destructuring_assignment)]
 #![feature(trait_upcasting)]
 
+use std::mem::swap;
 use fixedbitset::FixedBitSet;
+use image::error::ImageFormatHint::Name;
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use itermore::IterMore;
 use petgraph::matrix_graph::{node_index, MatrixGraph, NodeIndex};
@@ -12,23 +13,46 @@ use tsp_sa::map::*;
 #[derive(Clone,Copy)]
 enum OperateType {
     Swap,
-    Span
+    Span,
+    Move,
 }
 
-struct SwapSpanIterator<'a> {
+struct ChangeSolutionOperator<'a> {
     t: OperateType,
     path: & 'a mut Vec<NodeIndex>,
-    x: usize, y: usize,
+    x: usize, y: usize, z: usize,
     next: usize,
 }
 
-impl Iterator for SwapSpanIterator<'_> {
+impl Iterator for ChangeSolutionOperator<'_> {
     type Item = NodeIndex;
     fn next(&mut self) -> Option<Self::Item> {
         if self.next == self.path.len() {
             None
         } else {
             match self.t {
+                OperateType::Move => {
+                    // move [x, y] after z.
+                    // before:
+                    // ..., x, ..., y, ..., z, ...
+                    // after:
+                    // ..., ..., z, x, ..., y, ...
+                    if self.next < self.x {
+                        self.next += 1;
+                        Some(self.path[self.next - 1])
+                    } else if self.next < self.z - self.y + self.x {
+                        let diff = self.next + 1 - self.x;
+                        self.next += 1;
+                        Some(self.path[self.y + diff ])
+                    } else if self.next <= self.z {
+                        let diff = self.next - (self.x + self.z - self.y);
+                        self.next += 1;
+                        Some(self.path[self.x + diff])
+                    } else {
+                        self.next += 1;
+                        Some(self.path[self.next - 1])
+                    }
+                }
                 OperateType::Swap => {
                     if self.x == self.next {
                         self.next += 1;
@@ -55,32 +79,42 @@ impl Iterator for SwapSpanIterator<'_> {
     }
 }
 
-impl SwapSpanIterator<'_> {
+impl ChangeSolutionOperator<'_> {
     fn operate(& mut self) {
         match self.t {
+            OperateType::Move => {
+                // let copy = self.path.clone();
+                let new_self = ChangeSolutionOperator {
+                    t: self.t,
+                    path: self.path,
+                    x: self.x, y: self.y, z: self.z,
+                    next: 0,
+                };
+                *self.path = new_self.collect();
+            }
             OperateType::Swap => {
                 self.path.swap(self.x, self.y);
             }
             OperateType::Span => {
                 for i in 0..(self.y - self.x) / 2 {
                     self.path.swap(self.x + i, self.y - i);
-                    // (self.path[self.x + i], self.path[self.y - i]) = (self.path[self.y - i], self.path[self.x + i]);
                 }
             }
         }
     }
 }
 
-fn change_solution(path: &mut Vec<NodeIndex>) -> SwapSpanIterator {
+fn change_solution(path: &mut Vec<NodeIndex>) -> ChangeSolutionOperator {
     // generate a new solution by random swapping nodes in path
     let [mut x, mut y] = [
         rand::thread_rng().gen_range(1..path.len() - 1),
         rand::thread_rng().gen_range(1..path.len() - 1),
     ];
     if x > y {
-        (y, x) = (x, y);
+        swap(& mut x, & mut y);
+        // (y, x) = (x, y);
     }
-    SwapSpanIterator{
+    ChangeSolutionOperator {
         t: if random::<f64>() > 0.5 {
             OperateType::Swap
         } else {
@@ -89,6 +123,7 @@ fn change_solution(path: &mut Vec<NodeIndex>) -> SwapSpanIterator {
         path,
         x,
         y,
+        z: 0,
         next: 0
     }
 }
