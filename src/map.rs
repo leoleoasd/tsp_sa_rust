@@ -47,7 +47,9 @@ pub fn generate_solution(graph: &MatrixGraph<(), f64>, from: NodeIndex) -> Optio
             }
             visited.toggle(now.index());
             stack.push((now, 1));
-            for n in (graph.neighbors(now).collect::<Vec<_>>()) {
+            let mut t = graph.neighbors(now).collect::<Vec<_>>();
+            t.shuffle(&mut rng);
+            for n in t {
                 if !visited.contains(n.index()) {
                     stack.push((n, 0));
                 }
