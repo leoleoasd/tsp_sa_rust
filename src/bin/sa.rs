@@ -1,17 +1,17 @@
 #![feature(trait_upcasting)]
 
-use std::cmp::max;
-use std::mem::swap;
 use fixedbitset::FixedBitSet;
 use image::error::ImageFormatHint::Name;
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use itermore::IterMore;
 use petgraph::matrix_graph::{node_index, MatrixGraph, NodeIndex};
 use rand::prelude::*;
+use std::cmp::max;
+use std::mem::swap;
 use text_io::read;
 use tsp_sa::map::*;
 
-#[derive(Clone,Copy)]
+#[derive(Clone, Copy)]
 enum OperateType {
     Swap,
     Span,
@@ -20,8 +20,10 @@ enum OperateType {
 
 struct ChangeSolutionOperator<'a> {
     t: OperateType,
-    path: & 'a mut Vec<NodeIndex>,
-    x: usize, y: usize, z: usize,
+    path: &'a mut Vec<NodeIndex>,
+    x: usize,
+    y: usize,
+    z: usize,
     next: usize,
 }
 
@@ -44,7 +46,7 @@ impl Iterator for ChangeSolutionOperator<'_> {
                     } else if self.next < self.z - self.y + self.x {
                         let diff = self.next + 1 - self.x;
                         self.next += 1;
-                        Some(self.path[self.y + diff ])
+                        Some(self.path[self.y + diff])
                     } else if self.next <= self.z {
                         let diff = self.next - (self.x + self.z - self.y);
                         self.next += 1;
@@ -70,7 +72,7 @@ impl Iterator for ChangeSolutionOperator<'_> {
                     if self.x <= self.next && self.next <= self.y {
                         self.next += 1;
                         Some(self.path[self.y - (self.next - 1 - self.x)])
-                    } else{
+                    } else {
                         self.next += 1;
                         Some(self.path[self.next - 1])
                     }
@@ -81,14 +83,16 @@ impl Iterator for ChangeSolutionOperator<'_> {
 }
 
 impl ChangeSolutionOperator<'_> {
-    fn operate(& mut self) {
+    fn operate(&mut self) {
         match self.t {
             OperateType::Move => {
                 // let copy = self.path.clone();
                 let new_self = ChangeSolutionOperator {
                     t: self.t,
                     path: self.path,
-                    x: self.x, y: self.y, z: self.z,
+                    x: self.x,
+                    y: self.y,
+                    z: self.z,
                     next: 0,
                 };
                 *self.path = new_self.collect();
@@ -113,13 +117,13 @@ fn change_solution(path: &mut Vec<NodeIndex>) -> ChangeSolutionOperator {
         rand::thread_rng().gen_range(1..path.len() - 1),
     ];
     if y > z {
-        swap(& mut y, & mut z);
+        swap(&mut y, &mut z);
     }
     if x > z {
-        swap(& mut x, & mut z);
+        swap(&mut x, &mut z);
     }
     if x > y {
-        swap(& mut x, & mut y);
+        swap(&mut x, &mut y);
     }
     ChangeSolutionOperator {
         t: if random::<f64>() > 0.3 {
@@ -133,7 +137,7 @@ fn change_solution(path: &mut Vec<NodeIndex>) -> ChangeSolutionOperator {
         x,
         y,
         z: z,
-        next: 0
+        next: 0,
     }
 }
 
@@ -166,7 +170,7 @@ impl ExactSizeIterator for TemperatureIterator {
 
 fn simulated_annealing(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
     let mut solution = generate_solution(graph, node_index(0))?;
-    let mut solution_length = verify_solution(graph,solution.iter().copied());
+    let mut solution_length = verify_solution(graph, solution.iter().copied());
 
     let mut i = (TemperatureIterator {
         start: 500f64,
@@ -214,11 +218,7 @@ fn main() {
     // println!("{:?}", result);
     let ans1 = verify_solution(&graph, result1.unwrap().into_iter());
     let ans2 = verify_solution(&graph, result2.unwrap().into_iter());
-    println!("{:?}", if ans1 < ans2 {
-        ans1
-    } else {
-        ans2
-    });
+    println!("{:?}", if ans1 < ans2 { ans1 } else { ans2 });
 }
 
 /*

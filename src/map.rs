@@ -78,11 +78,10 @@ pub fn generate_solution(graph: &MatrixGraph<(), f64>, from: NodeIndex) -> Optio
     None
 }
 
-pub fn verify_solution<'a, T>(
-    graph: &MatrixGraph<(), f64>,
-    path: T
-) -> f64
-where T: Iterator<Item=NodeIndex> {
+pub fn verify_solution<'a, T>(graph: &MatrixGraph<(), f64>, path: T) -> f64
+    where
+        T: Iterator<Item=NodeIndex>,
+{
     let mut visited = FixedBitSet::with_capacity(graph.node_count());
     let length = path
         .windows()
