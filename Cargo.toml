@@ -16,6 +16,8 @@ indicatif = "0.16.2"
 imageproc = "0.22.0"
 image = "0.23.14"
 subprocess = "0.2.8"
+rayon = "1.5.1"
+permutation_iterator = "0.1.2"
 
 [[bin]]
 name = "simulated-annealing"

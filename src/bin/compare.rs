@@ -36,7 +36,7 @@ fn main() {
                 // println!("{}", input_data);
                 let mut output_sa = String::new();
                 let begin_time = std::time::Instant::now();
-                output_sa = Exec::shell("./target/release/simulated-annealing")
+                output_sa = Exec::shell("./target/release/ga")
                     .stdin(&input_data[..])
                     .stderr(NullFile)
                     .stdout(Redirection::Pipe)
