@@ -24,6 +24,10 @@ name = "simulated-annealing"
 path = "src/bin/sa.rs"
 
 [[bin]]
+name = "genetic-algorithm"
+path = "src/bin/ga.rs"
+
+[[bin]]
 name = "generate-map"
 path = "src/bin/gen.rs"
 

@@ -1,6 +1,6 @@
 // #![feature(std)]
 use fixedbitset::FixedBitSet;
-use indicatif::ProgressIterator;
+use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use permutation_iterator::Permutor;
 use petgraph::graph::Node;
 use petgraph::matrix_graph::{node_index, MatrixGraph, NodeIndex};
@@ -40,19 +40,23 @@ fn genetic_algorithm(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
         .map(|_: u32| generate_solution(&graph, node_index(0)))
         .filter_map(|x| Some(Box::new(x?)))
         .collect();
-    for _ in (0..200).progress() {
+    let bar = ProgressBar::new(200);
+    bar.set_style(
+        ProgressStyle::default_bar()
+            .template("[{elapsed} / {eta}]({per_sec}) {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}")
+            .progress_chars("##-"),
+    );
+    let mut p = (0..200).progress_with(bar);
+    while let Some(_) = p.next() {
         let mut mixed_solutions = Permutor::new(solutions.len() as u64)
             .zip(0..solutions.len() as u64)
             .collect::<Vec<_>>()
             .par_iter()
-            .map(|(i, j)| Box::new(mix(&solutions[*i as usize], &solutions[*j as usize])))
+            .map(|(i, j)| mix(&solutions[*i as usize], &solutions[*j as usize]))
             .collect::<Vec<_>>();
         solutions.append(&mut mixed_solutions);
         let mut changed_solutions = solutions
             .par_iter()
-            .filter(|x| {
-                random::<f64>() < 0.3
-            })
             .map(|x| Box::new(change_solution(x).collect::<Vec<_>>()))
             .collect::<Vec<_>>();
         solutions.append(&mut changed_solutions);
@@ -71,13 +75,13 @@ fn genetic_algorithm(graph: &MatrixGraph<(), f64>) -> Option<Vec<NodeIndex>> {
             .ok()?
             .map(|x| (*x.0).clone())
             .collect::<Vec<_>>();
-        println!("{}", solutions.iter()
-            .map(|x| {
-                verify_solution(&graph, x.iter().copied())
-            })
-            .min_by(|a, b| {
-                a.partial_cmp(b).unwrap()
-            })?);
+        p.progress.set_message(format!(
+            "{}",
+            solutions
+                .iter()
+                .map(|x| { verify_solution(&graph, x.iter().copied()) })
+                .min_by(|a, b| { a.partial_cmp(b).unwrap() })?
+        ));
         // for n in solutions.iter().min_by(|a, b| {
         //     verify_solution(&graph, a.iter().copied())
         //         .partial_cmp(&verify_solution(&graph, b.iter().copied()))

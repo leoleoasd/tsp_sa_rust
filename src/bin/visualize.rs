@@ -14,7 +14,7 @@ use tsp_sa::point::*;
 fn draw_points(points: Arc<Vec<Point>>) {
     let maxx = points.iter().map(|p| p.x).max().unwrap();
     let maxy = points.iter().map(|p| p.y).max().unwrap();
-    let mut base_img = ImageBuffer::new((maxx * 30 + 60) as u32, (maxy * 30 + 60) as u32);
+    let mut base_img = ImageBuffer::new((maxx * 10 + 20) as u32, (maxy * 10 + 20) as u32);
     let rect = Rect::at(0, 0).of_size(base_img.width(), base_img.height());
     draw_filled_rect_mut(&mut base_img, rect, Rgb([255, 255, 255]));
     for p in &*points {

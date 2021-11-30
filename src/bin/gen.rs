@@ -10,9 +10,9 @@ fn output_points(points: &Vec<Point>) {
         }
         println!();
     }
-    // for i in 0..points.len() {
-    //     println!("{} {}", points[i].x, points[i].y);
-    // }
+    for i in 0..points.len() {
+        println!("{} {}", points[i].x, points[i].y);
+    }
 }
 
 fn main() {

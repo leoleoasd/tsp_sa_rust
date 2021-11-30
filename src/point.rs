@@ -15,7 +15,7 @@ impl Point {
     }
 
     pub fn to_coord(&self) -> (i32, i32) {
-        ((self.x * 30 + 30) as i32, (self.y * 30 + 30) as i32)
+        ((self.x * 10 + 10) as i32, (self.y * 10 + 10) as i32)
     }
 }
 

@@ -98,8 +98,8 @@ pub fn generate_solution(graph: &MatrixGraph<(), f64>, from: NodeIndex) -> Optio
 
 /// Calculate the cost of a solution.
 pub fn verify_solution<'a, T>(graph: &MatrixGraph<(), f64>, path: T) -> f64
-    where
-        T: Iterator<Item=NodeIndex>,
+where
+    T: Iterator<Item = NodeIndex>,
 {
     let mut visited = FixedBitSet::with_capacity(graph.node_count());
     let length = path
@@ -128,10 +128,14 @@ pub fn verify_solution<'a, T>(graph: &MatrixGraph<(), f64>, path: T) -> f64
     }
 }
 
+/// Three different types supported.
 #[derive(Clone, Copy)]
 pub enum OperateType {
+    /// swap specific value
     Swap,
+    /// swap specific value and anything between them
     Span,
+    /// move a span of value after another value
     Move,
 }
 
